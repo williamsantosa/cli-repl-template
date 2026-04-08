@@ -22,9 +22,21 @@ type LoaderConfig struct {
 	MessageColor string `mapstructure:"message_color"`
 }
 
+type WelcomeConfig struct {
+	Greeting    string   `mapstructure:"greeting"`
+	Hint        string   `mapstructure:"hint"`
+	AccentColor string   `mapstructure:"accent_color"`
+	ShowTips    bool     `mapstructure:"show_tips"`
+	TipsTitle   string   `mapstructure:"tips_title"`
+	Tips        []string `mapstructure:"tips"`
+	ShowConfig  bool     `mapstructure:"show_config"`
+	ShowCwd     bool     `mapstructure:"show_cwd"`
+}
+
 type Config struct {
-	Art    ArtConfig    `mapstructure:"art"`
-	Loader LoaderConfig `mapstructure:"loader"`
+	Art     ArtConfig     `mapstructure:"art"`
+	Loader  LoaderConfig  `mapstructure:"loader"`
+	Welcome WelcomeConfig `mapstructure:"welcome"`
 }
 
 var C Config
@@ -40,6 +52,18 @@ func setDefaults() {
 	viper.SetDefault("loader.spinner_color", "205")
 	viper.SetDefault("loader.speed_ms", 100)
 	viper.SetDefault("loader.message_color", "252")
+
+	viper.SetDefault("welcome.greeting", "Welcome back, {user}!")
+	viper.SetDefault("welcome.hint", "Press any key to continue...")
+	viper.SetDefault("welcome.accent_color", "205")
+	viper.SetDefault("welcome.show_tips", true)
+	viper.SetDefault("welcome.tips_title", "Tips for getting started")
+	viper.SetDefault("welcome.tips", []string{
+		"Type 'help' to see commands",
+		"Type 'exit' to leave the REPL",
+	})
+	viper.SetDefault("welcome.show_config", true)
+	viper.SetDefault("welcome.show_cwd", true)
 }
 
 // Load reads configuration from the given file path (if non-empty),

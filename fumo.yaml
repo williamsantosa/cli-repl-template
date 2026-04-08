@@ -35,3 +35,31 @@ loader:
 
   # ANSI 256 color code for the status message text.
   message_color: "252"
+
+welcome:
+  # Greeting shown at the top of the welcome screen.
+  # Use {user} to insert the current OS username.
+  greeting: "Welcome back, {user}!"
+
+  # Hint text shown below the welcome box.
+  hint: "Press any key to continue..."
+
+  # ANSI 256 color code for borders and section headers.
+  accent_color: "205"
+
+  # Show the tips panel on the right side of the welcome screen.
+  show_tips: true
+
+  # Title for the tips section.
+  tips_title: "Tips for getting started"
+
+  # List of tip lines to display.
+  tips:
+    - "Type 'help' to see commands"
+    - "Type 'exit' to leave the REPL"
+
+  # Show current config info (art source, width).
+  show_config: true
+
+  # Show the current working directory.
+  show_cwd: true

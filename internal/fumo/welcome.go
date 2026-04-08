@@ -45,7 +45,8 @@ func getCwd() string {
 }
 
 func renderWelcomeView(artFrame string) string {
-	accent := lipgloss.Color("205")
+	cfg := config.C.Welcome
+	accent := lipgloss.Color(cfg.AccentColor)
 	bright := lipgloss.Color("255")
 	text := lipgloss.Color("252")
 	subtle := lipgloss.Color("240")
@@ -53,30 +54,44 @@ func renderWelcomeView(artFrame string) string {
 	greetStyle := lipgloss.NewStyle().Bold(true).Foreground(bright)
 	headerStyle := lipgloss.NewStyle().Bold(true).Foreground(accent)
 	tipStyle := lipgloss.NewStyle().Foreground(text)
-	boldTip := lipgloss.NewStyle().Bold(true).Foreground(bright)
 	dimStyle := lipgloss.NewStyle().Foreground(subtle)
 
-	greeting := greetStyle.Render("Welcome back, " + getUsername() + "!")
+	// Resolve {user} placeholder in greeting
+	greetText := strings.ReplaceAll(cfg.Greeting, "{user}", getUsername())
+	greeting := greetStyle.Render(greetText)
 
 	// Left column: greeting + art
 	left := "  " + greeting + "\n\n" + artFrame
 
-	// Right column: tips, config, cwd
-	source := config.C.Art.Source
-	if source != "built-in" {
-		source = filepath.Base(source)
+	// Right column: built from configured sections
+	var rightParts []string
+
+	if cfg.ShowTips && len(cfg.Tips) > 0 {
+		section := headerStyle.Render(cfg.TipsTitle)
+		for _, t := range cfg.Tips {
+			section += "\n" + tipStyle.Render(t)
+		}
+		rightParts = append(rightParts, section)
 	}
 
-	right := headerStyle.Render("Tips for getting started") + "\n" +
-		tipStyle.Render("Type ") + boldTip.Render("help") + tipStyle.Render(" to see commands") + "\n" +
-		tipStyle.Render("Type ") + boldTip.Render("exit") + tipStyle.Render(" to leave the REPL") + "\n\n" +
-		headerStyle.Render("Config") + "\n" +
-		dimStyle.Render("Art: ") + tipStyle.Render(source) + "\n" +
-		dimStyle.Render("Width: ") + tipStyle.Render(fmt.Sprint(config.C.Art.Width))
-
-	if cwd := getCwd(); cwd != "" {
-		right += "\n\n" + dimStyle.Render(cwd)
+	if cfg.ShowConfig {
+		source := config.C.Art.Source
+		if source != "built-in" {
+			source = filepath.Base(source)
+		}
+		section := headerStyle.Render("Config") + "\n" +
+			dimStyle.Render("Art: ") + tipStyle.Render(source) + "\n" +
+			dimStyle.Render("Width: ") + tipStyle.Render(fmt.Sprint(config.C.Art.Width))
+		rightParts = append(rightParts, section)
 	}
+
+	if cfg.ShowCwd {
+		if cwd := getCwd(); cwd != "" {
+			rightParts = append(rightParts, dimStyle.Render(cwd))
+		}
+	}
+
+	right := strings.Join(rightParts, "\n\n")
 
 	// Equalise column heights
 	lh := lipgloss.Height(left)
@@ -97,10 +112,11 @@ func renderWelcomeView(artFrame string) string {
 	}
 	divider := strings.Join(divParts, "\n")
 
-	inner := lipgloss.JoinHorizontal(lipgloss.Top, left+"  ", divider, "  "+right)
+	// Pass each gap as its own column so JoinHorizontal pads every line.
+	inner := lipgloss.JoinHorizontal(lipgloss.Top, left, "  ", divider, "  ", right)
 
 	box := wrapInBox(inner, " fumo cli "+Version+" ", accent)
-	hint := dimStyle.Render("  Press any key to continue...")
+	hint := dimStyle.Render("  " + cfg.Hint)
 
 	return box + "\n\n" + hint + "\n"
 }
