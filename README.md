@@ -50,25 +50,34 @@ loader:
   message_color: "252"      # ANSI 256 color for the status text
 ```
 
-### Custom Art from an Image
+### Embedding Custom Art
 
-Point `art.source` at any image file and it will be rendered in true color using Unicode half-block characters (`▄`), similar to chafa. Each character cell displays two pixels vertically for high-quality output:
+Art files are baked into the binary at build time via Go's `//go:embed`. Place your art file in the `assets/` directory and set `art.source` to the filename:
+
+1. Drop the file into `assets/` (e.g. `assets/my-image.png`)
+2. Set the source in `config.yaml`:
 
 ```yaml
 art:
-  source: "./my-image.png"
+  source: "my-image.png"
   width: 50
 ```
 
-Supported formats: PNG, JPEG, GIF, BMP.
+3. Build:
 
-### Custom Art from a Text File
+```bash
+go build -o myapp.exe .
+```
 
-For pre-made ANSI art, point to a `.txt` file instead:
+The resulting binary contains the art -- no external files needed. If the file is not found in the embedded assets, the built-in pixel art is used as a fallback.
+
+Image files (`.png`, `.jpg`, `.gif`, `.bmp`) are rendered in true color using Unicode half-block characters (`▄`), similar to chafa. Each character cell displays two pixels vertically for high-quality output.
+
+For pre-made ANSI art, use a `.txt` file instead:
 
 ```yaml
 art:
-  source: "./my-art.txt"
+  source: "my-art.txt"
 ```
 
 ## Adding Commands

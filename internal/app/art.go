@@ -8,7 +8,7 @@ import (
 	"image/gif"
 	_ "image/jpeg"
 	_ "image/png"
-	"os"
+	"io/fs"
 	"path/filepath"
 	"strings"
 	"time"
@@ -19,6 +19,25 @@ import (
 
 	"github.com/williamsantosa/cli-repl-template/internal/config"
 )
+
+// EmbeddedAssets is the embedded filesystem set from main.go via //go:embed.
+// Art files are read exclusively from here; if a file is missing the app
+// falls back to the built-in pixel art.
+var EmbeddedAssets fs.FS
+
+func openArtFile(path string) (fs.File, error) {
+	if EmbeddedAssets != nil {
+		return EmbeddedAssets.Open(path)
+	}
+	return nil, fmt.Errorf("no embedded assets")
+}
+
+func readArtFile(path string) ([]byte, error) {
+	if EmbeddedAssets != nil {
+		return fs.ReadFile(EmbeddedAssets, path)
+	}
+	return nil, fmt.Errorf("no embedded assets")
+}
 
 // Frame holds a single pre-rendered frame and its display duration.
 type Frame struct {
@@ -155,7 +174,7 @@ func renderHalfBlocks(img image.Image, width int) string {
 // properly handling disposal methods, and returns each composited
 // full-canvas frame as an image.Image along with its delay.
 func compositeGIFFrames(path string) ([]image.Image, []time.Duration, error) {
-	f, err := os.Open(path)
+	f, err := openArtFile(path)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -206,7 +225,7 @@ func compositeGIFFrames(path string) ([]image.Image, []time.Duration, error) {
 }
 
 func openStaticImage(path string) (image.Image, error) {
-	f, err := os.Open(path)
+	f, err := openArtFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -220,7 +239,7 @@ func openStaticImage(path string) (image.Image, error) {
 }
 
 func loadCustomArt(path string) (string, error) {
-	data, err := os.ReadFile(path)
+	data, err := readArtFile(path)
 	if err != nil {
 		return "", err
 	}

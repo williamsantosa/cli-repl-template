@@ -6,10 +6,12 @@ name: "cli-repl"
 
 art:
   # "built-in" uses the embedded pixel art.
-  # Set to a file path to load custom art:
+  # Place art files in the assets/ directory and use just the filename.
+  # They are baked into the binary at build time via go:embed.
   #   - Image files (.png, .jpg, .gif, .bmp) are auto-converted to colored ASCII art
   #   - Text files (.txt) are displayed as-is (for pre-made ANSI art)
-  source: "./media/touhou-cirno.gif"
+  # If the file is not found in the embedded assets, built-in pixel art is used.
+  source: "touhou-cirno.gif"
 
   # Width in characters for image rendering (ignored for .txt and built-in).
   width: 30
