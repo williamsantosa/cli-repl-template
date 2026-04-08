@@ -1,0 +1,37 @@
+# Fumo CLI configuration
+# Place this file in the working directory or at $HOME/.fumo/fumo.yaml
+
+art:
+  # "built-in" uses the embedded fumo pixel art.
+  # Set to a file path to load custom art:
+  #   - Image files (.png, .jpg, .gif, .bmp) are auto-converted to colored ASCII art
+  #   - Text files (.txt) are displayed as-is (for pre-made ANSI art)
+  source: "./media/touhou-cirno.gif"
+
+  # Width in characters for image rendering (ignored for .txt and built-in).
+  width: 30
+
+  # Character cell width/height ratio. Adjusts for vertical stretching.
+  # Default 0.45 works for most fonts. Increase if image looks squished,
+  # decrease if it looks stretched.
+  cell_ratio: 0.45
+
+  # Wrap the art in a rounded border.
+  border: false
+
+  # ANSI 256 color code for the border (63 = purple).
+  border_color: "63"
+
+loader:
+  # Spinner style. Options: dots, line, minidot, jump, pulse,
+  # points, globe, moon, monkey, meter, hamburger
+  spinner: "dots"
+
+  # ANSI 256 color code for the spinner (205 = pink).
+  spinner_color: "205"
+
+  # Milliseconds between spinner frames.
+  speed_ms: 100
+
+  # ANSI 256 color code for the status message text.
+  message_color: "252"
