@@ -30,7 +30,8 @@ The CLI reads its config from `config.yaml`, searched in this order:
 
 1. Path given via `--config` flag
 2. Current working directory
-3. `$HOME/.cli-repl/config.yaml`
+3. Next to the executable (so you can run the binary from anywhere)
+4. `$HOME/.cli-repl/config.yaml`
 
 All settings have defaults, so no config file is required.
 

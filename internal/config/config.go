@@ -69,21 +69,44 @@ func setDefaults() {
 	viper.SetDefault("welcome.show_cwd", true)
 }
 
+// exeDir returns the directory containing the running executable,
+// following symlinks. Returns "" if it can't be determined.
+func exeDir() string {
+	exe, err := os.Executable()
+	if err != nil {
+		return ""
+	}
+	real, err := filepath.EvalSymlinks(exe)
+	if err != nil {
+		return ""
+	}
+	return filepath.Dir(real)
+}
+
 // Load reads configuration from the given file path (if non-empty),
-// or searches the working directory and $HOME/.cli-repl/ for config.yaml.
+// or searches the working directory, the executable's directory,
+// and $HOME/.cli-repl/ for config.yaml.
 func Load(cfgFile string) error {
 	setDefaults()
 
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Prefer an explicit file in the working directory so that
-		// viper's config-path search doesn't miss it on Windows.
 		if _, err := os.Stat("config.yaml"); err == nil {
 			viper.SetConfigFile("config.yaml")
-		} else {
+		} else if dir := exeDir(); dir != "" {
+			candidate := filepath.Join(dir, "config.yaml")
+			if _, err := os.Stat(candidate); err == nil {
+				viper.SetConfigFile(candidate)
+			}
+		}
+
+		if viper.ConfigFileUsed() == "" {
 			viper.SetConfigName("config")
 			viper.SetConfigType("yaml")
+			if dir := exeDir(); dir != "" {
+				viper.AddConfigPath(dir)
+			}
 			if home, err := os.UserHomeDir(); err == nil {
 				viper.AddConfigPath(filepath.Join(home, ".cli-repl"))
 			}
