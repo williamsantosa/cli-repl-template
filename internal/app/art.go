@@ -1,4 +1,4 @@
-package fumo
+package app
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ import (
 	"github.com/nfnt/resize"
 	_ "golang.org/x/image/bmp"
 
-	"github.com/fumo-cli/fumo-command-line-interface/internal/config"
+	"github.com/williamsantosa/cli-repl-template/internal/config"
 )
 
 // Frame holds a single pre-rendered frame and its display duration.
@@ -34,7 +34,7 @@ var imageExtensions = map[string]bool{
 	".bmp":  true,
 }
 
-var fumoPixels = []string{
+var builtinPixels = []string{
 	"......HHHHHH............",
 	"....HHHHHHHHH...........",
 	"...HHHHHHHHHHHH.........",
@@ -68,7 +68,7 @@ var palette = map[rune]lipgloss.Color{
 
 func renderBuiltinArt() string {
 	var sb strings.Builder
-	for i, row := range fumoPixels {
+	for i, row := range builtinPixels {
 		for _, ch := range row {
 			if color, ok := palette[ch]; ok {
 				style := lipgloss.NewStyle().Foreground(color).Background(color)
@@ -77,7 +77,7 @@ func renderBuiltinArt() string {
 				sb.WriteString("  ")
 			}
 		}
-		if i < len(fumoPixels)-1 {
+		if i < len(builtinPixels)-1 {
 			sb.WriteRune('\n')
 		}
 	}
@@ -108,8 +108,6 @@ func renderHalfBlocks(img image.Image, width int) string {
 	}
 
 	targetW := width
-	// Each half-block character is cellRatio wide : 1 tall on screen.
-	// Multiply height by cellRatio*2 to compensate (half-blocks pack 2 pixels per row).
 	targetH := int(float64(srcH) / float64(srcW) * float64(targetW) * cellRatio * 2)
 	if targetH%2 != 0 {
 		targetH++
@@ -176,7 +174,6 @@ func compositeGIFFrames(path string) ([]image.Image, []time.Duration, error) {
 	delays := make([]time.Duration, len(g.Image))
 
 	for i, frame := range g.Image {
-		// Apply disposal from the previous frame before drawing this one
 		if i > 0 {
 			var disposal byte
 			if i-1 < len(g.Disposal) {
@@ -194,7 +191,6 @@ func compositeGIFFrames(path string) ([]image.Image, []time.Duration, error) {
 
 		draw.Draw(canvas, frame.Bounds(), frame, frame.Bounds().Min, draw.Over)
 
-		// Snapshot the canvas
 		snapshot := image.NewRGBA(bounds)
 		draw.Draw(snapshot, bounds, canvas, image.Point{}, draw.Src)
 		images[i] = snapshot

@@ -34,6 +34,7 @@ type WelcomeConfig struct {
 }
 
 type Config struct {
+	Name    string        `mapstructure:"name"`
 	Art     ArtConfig     `mapstructure:"art"`
 	Loader  LoaderConfig  `mapstructure:"loader"`
 	Welcome WelcomeConfig `mapstructure:"welcome"`
@@ -42,6 +43,8 @@ type Config struct {
 var C Config
 
 func setDefaults() {
+	viper.SetDefault("name", "cli-repl")
+
 	viper.SetDefault("art.source", "built-in")
 	viper.SetDefault("art.width", 40)
 	viper.SetDefault("art.cell_ratio", 0.45)
@@ -67,22 +70,26 @@ func setDefaults() {
 }
 
 // Load reads configuration from the given file path (if non-empty),
-// or searches the working directory and $HOME/.fumo/ for fumo.yaml.
+// or searches the working directory and $HOME/.cli-repl/ for config.yaml.
 func Load(cfgFile string) error {
 	setDefaults()
 
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
 	} else {
-		viper.SetConfigName("fumo")
-		viper.SetConfigType("yaml")
-		viper.AddConfigPath(".")
-		if home, err := os.UserHomeDir(); err == nil {
-			viper.AddConfigPath(filepath.Join(home, ".fumo"))
+		// Prefer an explicit file in the working directory so that
+		// viper's config-path search doesn't miss it on Windows.
+		if _, err := os.Stat("config.yaml"); err == nil {
+			viper.SetConfigFile("config.yaml")
+		} else {
+			viper.SetConfigName("config")
+			viper.SetConfigType("yaml")
+			if home, err := os.UserHomeDir(); err == nil {
+				viper.AddConfigPath(filepath.Join(home, ".cli-repl"))
+			}
 		}
 	}
 
-	// It's fine if no config file exists — defaults will be used.
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 			return err

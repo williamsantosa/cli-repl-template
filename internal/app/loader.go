@@ -1,4 +1,4 @@
-package fumo
+package app
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/fumo-cli/fumo-command-line-interface/internal/config"
+	"github.com/williamsantosa/cli-repl-template/internal/config"
 )
 
 type taskDoneMsg struct{ err error }
@@ -129,7 +129,7 @@ func (m loaderModel) View() string {
 	)
 }
 
-// RunLoader displays the fumo art with an animated spinner while task executes.
+// RunLoader displays the art with an animated spinner while task executes.
 // If the art source is an animated GIF, the frames cycle automatically.
 func RunLoader(message string, task func() error) error {
 	m := newLoaderModel(message)
@@ -153,7 +153,7 @@ func RunLoader(message string, task func() error) error {
 	return nil
 }
 
-// RunAnimation displays the fumo art in a loop (no spinner, no task).
+// RunAnimation displays the art in a loop (no spinner, no task).
 // For animated GIFs, frames cycle until the user presses q or ctrl+c.
 // For static art, it just displays until dismissed.
 func RunAnimation() error {
@@ -169,11 +169,11 @@ func RunAnimation() error {
 }
 
 type animModel struct {
-	frames      []Frame
-	frameIdx    int
-	once        bool
-	waitForKey  bool
-	done        bool
+	frames     []Frame
+	frameIdx   int
+	once       bool
+	waitForKey bool
+	done       bool
 }
 
 func (m animModel) Init() tea.Cmd {

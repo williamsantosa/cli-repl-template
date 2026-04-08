@@ -1,4 +1,4 @@
-package fumo
+package app
 
 import (
 	"fmt"
@@ -7,38 +7,56 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+
+	"github.com/williamsantosa/cli-repl-template/internal/config"
 )
 
-// CommandHandler processes a command string and returns output.
-// Register your own handlers via RegisterCommand before calling RunREPL.
-type CommandHandler func(args []string) string
+// Command holds a handler and its description for the REPL.
+type Command struct {
+	Handler     func(args []string) string
+	Description string
+}
 
-var commands map[string]CommandHandler
+var commands map[string]Command
 
 func init() {
-	commands = map[string]CommandHandler{
-		"help": func(args []string) string {
-			var sb strings.Builder
-			sb.WriteString("Available commands:\n")
-			for name := range commands {
-				sb.WriteString("  " + name + "\n")
-			}
-			return sb.String()
+	commands = map[string]Command{
+		"help": {
+			Description: "Show available commands, or 'help <command>' for details",
+			Handler: func(args []string) string {
+				if len(args) > 0 {
+					name := strings.ToLower(args[0])
+					if cmd, ok := commands[name]; ok {
+						return name + " — " + cmd.Description
+					}
+					return fmt.Sprintf("unknown command: %s", name)
+				}
+				var sb strings.Builder
+				sb.WriteString("Available commands:\n")
+				for name, cmd := range commands {
+					sb.WriteString(fmt.Sprintf("  %-10s %s\n", name, cmd.Description))
+				}
+				return strings.TrimRight(sb.String(), "\n")
+			},
 		},
-		"echo": func(args []string) string {
-			return strings.Join(args, " ")
+		"echo": {
+			Description: "Repeat the given text back",
+			Handler: func(args []string) string {
+				return strings.Join(args, " ")
+			},
 		},
 	}
 }
 
 // RegisterCommand adds a named command handler to the REPL.
-func RegisterCommand(name string, handler CommandHandler) {
-	commands[name] = handler
+func RegisterCommand(name string, description string, handler func(args []string) string) {
+	commands[name] = Command{Handler: handler, Description: description}
 }
 
 type replModel struct {
 	input    textinput.Model
 	quitting bool
+	prompt   string
 
 	promptStyle lipgloss.Style
 	outputStyle lipgloss.Style
@@ -46,17 +64,20 @@ type replModel struct {
 }
 
 func newREPLModel() replModel {
+	prompt := config.C.Name + "> "
+
 	ti := textinput.New()
 	ti.Placeholder = "type a command..."
 	ti.Focus()
 	ti.CharLimit = 256
 	ti.Width = 60
-	ti.Prompt = "fumo> "
+	ti.Prompt = prompt
 	ti.PromptStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Bold(true)
 	ti.TextStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("252"))
 
 	return replModel{
 		input:       ti,
+		prompt:      prompt,
 		promptStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Bold(true),
 		outputStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("252")),
 		dimStyle:    lipgloss.NewStyle().Foreground(lipgloss.Color("240")),
@@ -88,7 +109,7 @@ func (m replModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if output == "\x00CLEAR" {
 				return m, tea.ClearScreen
 			}
-			line := m.promptStyle.Render("fumo> ") + m.outputStyle.Render(input)
+			line := m.promptStyle.Render(m.prompt) + m.outputStyle.Render(input)
 			if output != "" {
 				line += "\n" + m.outputStyle.Render(output)
 			}
@@ -109,8 +130,8 @@ func (m replModel) executeCommand(input string) string {
 	name := strings.ToLower(parts[0])
 	args := parts[1:]
 
-	if handler, ok := commands[name]; ok {
-		return handler(args)
+	if cmd, ok := commands[name]; ok {
+		return cmd.Handler(args)
 	}
 	return fmt.Sprintf("unknown command: %s (type 'help' for available commands)", name)
 }
@@ -119,11 +140,12 @@ func (m replModel) View() string {
 	if m.quitting {
 		return ""
 	}
-	return m.input.View() + "\n" +
-		m.dimStyle.Render("  exit/quit to leave")
+	return m.dimStyle.Render("──────────────────────────────────────────────────") + "\n" +
+		m.input.View() + "\n" +
+		m.dimStyle.Render("  type 'help' for commands · exit/quit to leave")
 }
 
-// RunREPL plays the fumo animation once, then starts the interactive REPL
+// RunREPL plays the animation once, then starts the interactive REPL
 // with the prompt pinned at the bottom. Command output is printed into the
 // terminal scrollback above the prompt.
 func RunREPL() error {

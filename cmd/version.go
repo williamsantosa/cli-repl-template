@@ -5,16 +5,16 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/fumo-cli/fumo-command-line-interface/internal/fumo"
+	"github.com/williamsantosa/cli-repl-template/internal/app"
 )
 
 var BuildDate = "unknown"
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print the version of fumo CLI",
+	Short: "Print the version of the CLI",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("fumo CLI %s (built %s)\n", fumo.Version, BuildDate)
+		fmt.Printf("cli-repl %s (built %s)\n", app.Version, BuildDate)
 	},
 }
 

@@ -1,4 +1,4 @@
-package fumo
+package app
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/fumo-cli/fumo-command-line-interface/internal/config"
+	"github.com/williamsantosa/cli-repl-template/internal/config"
 )
 
 // Version can be set at build time via ldflags.
@@ -56,14 +56,11 @@ func renderWelcomeView(artFrame string) string {
 	tipStyle := lipgloss.NewStyle().Foreground(text)
 	dimStyle := lipgloss.NewStyle().Foreground(subtle)
 
-	// Resolve {user} placeholder in greeting
 	greetText := strings.ReplaceAll(cfg.Greeting, "{user}", getUsername())
 	greeting := greetStyle.Render(greetText)
 
-	// Left column: greeting + art
 	left := "  " + greeting + "\n\n" + artFrame
 
-	// Right column: built from configured sections
 	var rightParts []string
 
 	if cfg.ShowTips && len(cfg.Tips) > 0 {
@@ -93,7 +90,6 @@ func renderWelcomeView(artFrame string) string {
 
 	right := strings.Join(rightParts, "\n\n")
 
-	// Equalise column heights
 	lh := lipgloss.Height(left)
 	rh := lipgloss.Height(right)
 	h := max(lh, rh)
@@ -104,7 +100,6 @@ func renderWelcomeView(artFrame string) string {
 		right += strings.Repeat("\n", h-rh)
 	}
 
-	// Vertical divider
 	divStyle := lipgloss.NewStyle().Foreground(accent)
 	divParts := make([]string, h)
 	for i := range divParts {
@@ -112,10 +107,9 @@ func renderWelcomeView(artFrame string) string {
 	}
 	divider := strings.Join(divParts, "\n")
 
-	// Pass each gap as its own column so JoinHorizontal pads every line.
 	inner := lipgloss.JoinHorizontal(lipgloss.Top, left, "  ", divider, "  ", right)
 
-	box := wrapInBox(inner, " fumo cli "+Version+" ", accent)
+	box := wrapInBox(inner, " "+config.C.Name+" cli "+Version+" ", accent)
 	hint := dimStyle.Render("  " + cfg.Hint)
 
 	return box + "\n\n" + hint + "\n"
@@ -138,7 +132,6 @@ func wrapInBox(content string, title string, borderColor lipgloss.Color) string 
 
 	innerW := maxW + 4
 
-	// Top border: ╭─ title ────────╮
 	titleRendered := tc.Render(title)
 	titleW := lipgloss.Width(titleRendered)
 	dashes := innerW - 1 - titleW
@@ -147,7 +140,6 @@ func wrapInBox(content string, title string, borderColor lipgloss.Color) string 
 	}
 	top := bc.Render("╭─") + titleRendered + bc.Render(strings.Repeat("─", dashes)+"╮")
 
-	// Blank line after top border for breathing room
 	blankPad := strings.Repeat(" ", innerW)
 	spacer := bc.Render("│") + blankPad + bc.Render("│")
 

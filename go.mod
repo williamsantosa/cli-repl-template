@@ -1,4 +1,4 @@
-module github.com/fumo-cli/fumo-command-line-interface
+module github.com/williamsantosa/cli-repl-template
 
 go 1.26.2
 

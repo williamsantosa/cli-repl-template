@@ -1,8 +1,11 @@
-# Fumo CLI configuration
-# Place this file in the working directory or at $HOME/.fumo/fumo.yaml
+# CLI REPL Template configuration
+# Place this file in the working directory or at $HOME/.cli-repl/config.yaml
+
+# The display name used in the REPL prompt and welcome screen.
+name: "cli-repl"
 
 art:
-  # "built-in" uses the embedded fumo pixel art.
+  # "built-in" uses the embedded pixel art.
   # Set to a file path to load custom art:
   #   - Image files (.png, .jpg, .gif, .bmp) are auto-converted to colored ASCII art
   #   - Text files (.txt) are displayed as-is (for pre-made ANSI art)

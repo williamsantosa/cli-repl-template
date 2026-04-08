@@ -1,6 +1,6 @@
 package main
 
-import "github.com/fumo-cli/fumo-command-line-interface/cmd"
+import "github.com/williamsantosa/cli-repl-template/cmd"
 
 func main() {
 	cmd.Execute()

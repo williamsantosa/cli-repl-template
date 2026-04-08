@@ -1,36 +1,36 @@
-# Fumo CLI
+# CLI REPL Template
 
-A configurable Go command-line interface template featuring a fumo loading screen with ANSI block art.
+A configurable Go command-line interface template featuring a loading screen with ANSI block art.
 
 ## Quick Start
 
 ```bash
-# Build
-go build -o fumo.exe .
+# Build (use -o to name the output binary whatever you like)
+go build -o myapp.exe .
 
 # Show help
-./fumo --help
+./myapp --help
 
-# Display the fumo art
-./fumo show
+# Display the art
+./myapp show
 
 # Run the loading animation demo (3 seconds by default)
-./fumo loading
+./myapp loading
 
 # Run for a custom duration
-./fumo loading -d 5
+./myapp loading -d 5
 
 # Print version
-./fumo version
+./myapp version
 ```
 
 ## Configuration
 
-The CLI reads its config from `fumo.yaml`, searched in this order:
+The CLI reads its config from `config.yaml`, searched in this order:
 
 1. Path given via `--config` flag
 2. Current working directory
-3. `$HOME/.fumo/fumo.yaml`
+3. `$HOME/.cli-repl/config.yaml`
 
 All settings have defaults, so no config file is required.
 
@@ -56,7 +56,7 @@ Point `art.source` at any image file and it will be rendered in true color using
 
 ```yaml
 art:
-  source: "./my-fumo.png"
+  source: "./my-image.png"
   width: 50
 ```
 
@@ -68,7 +68,7 @@ For pre-made ANSI art, point to a `.txt` file instead:
 
 ```yaml
 art:
-  source: "./my-fumo.txt"
+  source: "./my-art.txt"
 ```
 
 ## Adding Commands
@@ -84,8 +84,8 @@ var myCmd = &cobra.Command{
     Use:   "mycommand",
     Short: "Description here",
     RunE: func(cmd *cobra.Command, args []string) error {
-        // Use fumo.RunLoader("Working...", func() error { ... })
-        // to wrap long-running tasks with the fumo loader.
+        // Use app.RunLoader("Working...", func() error { ... })
+        // to wrap long-running tasks with the loader.
         return nil
     },
 }
@@ -98,9 +98,9 @@ func init() {
 ## Using the Loader in Code
 
 ```go
-import "github.com/fumo-cli/fumo-command-line-interface/internal/fumo"
+import "github.com/williamsantosa/cli-repl-template/internal/app"
 
-err := fumo.RunLoader("Downloading...", func() error {
+err := app.RunLoader("Downloading...", func() error {
     // your long-running work here
     return nil
 })
@@ -113,5 +113,5 @@ Builds and runs on Windows, macOS, and Linux with a single `go build`. ANSI colo
 ## Build with Version Info
 
 ```bash
-go build -ldflags "-X github.com/fumo-cli/fumo-command-line-interface/cmd.Version=1.0.0 -X github.com/fumo-cli/fumo-command-line-interface/cmd.BuildDate=$(date -u +%Y-%m-%d)" -o fumo.exe .
+go build -ldflags "-X github.com/williamsantosa/cli-repl-template/internal/app.Version=1.0.0 -X github.com/williamsantosa/cli-repl-template/cmd.BuildDate=$(date -u +%Y-%m-%d)" -o myapp.exe .
 ```
