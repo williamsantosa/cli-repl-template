@@ -122,7 +122,9 @@ func (m replModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m replModel) executeCommand(input string) string {
+// ExecuteCommand dispatches a single REPL command string and returns the output.
+// This is used by both the interactive REPL and the non-interactive "run" subcommand.
+func ExecuteCommand(input string) string {
 	parts := strings.Fields(input)
 	if len(parts) == 0 {
 		return ""
@@ -134,6 +136,10 @@ func (m replModel) executeCommand(input string) string {
 		return cmd.Handler(args)
 	}
 	return fmt.Sprintf("unknown command: %s (type 'help' for available commands)", name)
+}
+
+func (m replModel) executeCommand(input string) string {
+	return ExecuteCommand(input)
 }
 
 func (m replModel) View() string {

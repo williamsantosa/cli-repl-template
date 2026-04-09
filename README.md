@@ -20,6 +20,9 @@ go build -o myapp.exe .
 # Run for a custom duration
 ./myapp loading -d 5
 
+# Run a REPL command non-interactively
+./myapp run echo hello world
+
 # Print version
 ./myapp version
 ```
