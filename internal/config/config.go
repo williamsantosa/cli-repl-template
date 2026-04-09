@@ -23,6 +23,7 @@ type LoaderConfig struct {
 }
 
 type WelcomeConfig struct {
+	Title       string   `mapstructure:"title"`
 	Greeting    string   `mapstructure:"greeting"`
 	Hint        string   `mapstructure:"hint"`
 	AccentColor string   `mapstructure:"accent_color"`
@@ -56,6 +57,7 @@ func setDefaults() {
 	viper.SetDefault("loader.speed_ms", 100)
 	viper.SetDefault("loader.message_color", "252")
 
+	viper.SetDefault("welcome.title", "{name} v{version}")
 	viper.SetDefault("welcome.greeting", "Welcome back, {user}!")
 	viper.SetDefault("welcome.hint", "Press any key to continue...")
 	viper.SetDefault("welcome.accent_color", "205")

@@ -109,7 +109,10 @@ func renderWelcomeView(artFrame string) string {
 
 	inner := lipgloss.JoinHorizontal(lipgloss.Top, left, "  ", divider, "  ", right)
 
-	box := wrapInBox(inner, " "+config.C.Name+" cli "+Version+" ", accent)
+	title := config.C.Welcome.Title
+	title = strings.ReplaceAll(title, "{name}", config.C.Name)
+	title = strings.ReplaceAll(title, "{version}", Version)
+	box := wrapInBox(inner, " "+title+" ", accent)
 	hint := dimStyle.Render("  " + cfg.Hint)
 
 	return box + "\n\n" + hint + "\n"

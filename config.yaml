@@ -42,6 +42,10 @@ loader:
   message_color: "252"
 
 welcome:
+  # Title shown in the top border of the welcome box.
+  # Use {name} for the app name and {version} for the version string.
+  title: "{name} v{version}"
+
   # Greeting shown at the top of the welcome screen.
   # Use {user} to insert the current OS username.
   greeting: "Welcome back, {user}!"
@@ -62,6 +66,7 @@ welcome:
   tips:
     - "Type 'help' to see commands"
     - "Type 'exit' to leave the REPL"
+    - "Sleep 8 hours for a good night's sleep"
 
   # Show current config info (art source, width).
   show_config: true
