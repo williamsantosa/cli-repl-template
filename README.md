@@ -11,6 +11,15 @@ go build -o myapp.exe .
 # Show help
 ./myapp --help
 
+# Start the interactive REPL (same as ./myapp repl)
+./myapp
+
+# Debug: config resolution and art fallbacks (log lines on stderr)
+./myapp -v show
+
+# Shell completion (bash, zsh, fish, powershell)
+./myapp completion powershell > completer.ps1
+
 # Display the art
 ./myapp show
 

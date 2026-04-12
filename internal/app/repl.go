@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -33,7 +34,13 @@ func init() {
 				}
 				var sb strings.Builder
 				sb.WriteString("Available commands:\n")
-				for name, cmd := range commands {
+				names := make([]string, 0, len(commands))
+				for name := range commands {
+					names = append(names, name)
+				}
+				slices.Sort(names)
+				for _, name := range names {
+					cmd := commands[name]
 					sb.WriteString(fmt.Sprintf("  %-10s %s\n", name, cmd.Description))
 				}
 				return strings.TrimRight(sb.String(), "\n")

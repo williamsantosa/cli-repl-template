@@ -9,6 +9,7 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"io/fs"
+	"log/slog"
 	"path/filepath"
 	"strings"
 	"time"
@@ -54,24 +55,19 @@ var imageExtensions = map[string]bool{
 }
 
 var builtinPixels = []string{
-	"......HHHHHH............",
-	"....HHHHHHHHH...........",
-	"...HHHHHHHHHHHH.........",
-	"..HHHHSSSSSSHHH.........",
-	"..HHSSSSSSSSSHH.........",
-	"..HSSSKSSKSSSSH.........",
-	"..HSSSSSSSSSSSH.........",
-	"..HSSSSMMSSSSHH.........",
-	"..HHSSSSSSSSHHH.........",
-	"...RRRRRRRRRR...........",
-	"..RRWWWWWWWWWRR.........",
-	".RRWWWWWWWWWWWRR........",
-	".RWWWWWWWWWWWWWR........",
-	".RWWWSSSWWWSSSWR........",
-	".RWWWWWWWWWWWWWR........",
-	"..RWWWWWWWWWWWR.........",
-	"...RRWWWWWWWRR..........",
-	"....SSSSSSSSS...........",
+	"..........................",
+	"....SSSSSSSSSSSSSSSS....",
+	"...SSSSSSSSSSSSSSSSSS...",
+	"..SSSSSSSSSSSSSSSSSSSS..",
+	"..SSSSKKSSSSSSSSSSKKSSSS..",
+	"..SSSSKKSSSSSSSSSSKKSSSS..",
+	"..SSSSSSSSSSSSSSSSSSSS..",
+	"..SSSSSSSSSSSSSSSSSSSS..",
+	"...SSSSSSKKKKKKKKSSSSSS...",
+	"..SSSSSSSSSSSSSSSSSSSS..",
+	"...SSSSSSSSSSSSSSSSSS...",
+	"....SSSSSSSSSSSSSSSS....",
+	".........SSSSSSSS.........",
 }
 
 var palette = map[rune]lipgloss.Color{
@@ -282,6 +278,7 @@ func RenderFrames() []Frame {
 		if isGIF(cfg.Source) {
 			images, delays, err := compositeGIFFrames(cfg.Source)
 			if err != nil {
+				slog.Debug("art: falling back to built-in", "source", cfg.Source, "reason", err)
 				return []Frame{{Rendered: applyBorder(renderBuiltinArt()), Delay: 0}}
 			}
 			frames := make([]Frame, len(images))
@@ -294,6 +291,7 @@ func RenderFrames() []Frame {
 
 		img, err := openStaticImage(cfg.Source)
 		if err != nil {
+			slog.Debug("art: falling back to built-in", "source", cfg.Source, "reason", err)
 			return []Frame{{Rendered: applyBorder(renderBuiltinArt()), Delay: 0}}
 		}
 		return []Frame{{Rendered: applyBorder(renderHalfBlocks(img, cfg.Width)), Delay: 0}}
@@ -301,6 +299,7 @@ func RenderFrames() []Frame {
 
 	custom, err := loadCustomArt(cfg.Source)
 	if err != nil {
+		slog.Debug("art: falling back to built-in", "source", cfg.Source, "reason", err)
 		return []Frame{{Rendered: applyBorder(renderBuiltinArt()), Delay: 0}}
 	}
 	return []Frame{{Rendered: applyBorder(custom), Delay: 0}}

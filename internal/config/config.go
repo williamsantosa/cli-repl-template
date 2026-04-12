@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -92,6 +93,7 @@ func Load(cfgFile string) error {
 	setDefaults()
 
 	if cfgFile != "" {
+		slog.Debug("config: using explicit path", "path", cfgFile)
 		viper.SetConfigFile(cfgFile)
 	} else {
 		if _, err := os.Stat("config.yaml"); err == nil {
@@ -108,17 +110,24 @@ func Load(cfgFile string) error {
 			viper.SetConfigType("yaml")
 			if dir := exeDir(); dir != "" {
 				viper.AddConfigPath(dir)
+				slog.Debug("config: search path", "dir", dir)
 			}
 			if home, err := os.UserHomeDir(); err == nil {
-				viper.AddConfigPath(filepath.Join(home, ".cli-repl"))
+				p := filepath.Join(home, ".cli-repl")
+				viper.AddConfigPath(p)
+				slog.Debug("config: search path", "dir", p)
 			}
 		}
 	}
 
 	if err := viper.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			slog.Debug("config: no file found; using defaults")
+		} else {
 			return err
 		}
+	} else if used := viper.ConfigFileUsed(); used != "" {
+		slog.Debug("config: loaded", "path", used)
 	}
 
 	return viper.Unmarshal(&C)
